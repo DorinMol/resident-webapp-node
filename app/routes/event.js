@@ -15,24 +15,22 @@ router.get("/:eventType/average", async (req, res) => {
         ],
       };
     }
-    const eventLogs = await EventModel.find(searchOptions).exec();
-    if (eventLogs.length) {
-      const average =
-        eventLogs
-          .map((eventLog) => eventLog.value)
-          .reduce((v1, v2) => v1 + v2, 0) / eventLogs.length;
+    const { average, processedCount } = await EventModel.findAverage(
+      searchOptions
+    );
+    if (processedCount) {
       const response = {
         type: req.params.eventType,
         value: average,
-        processedCount: eventLogs.length,
+        processedCount,
       };
       res.send(JSON.stringify(response));
     } else {
       res.send(`Couldn't find any logs for the specified query!`);
     }
   } catch (err) {
-    res.send("something is wrong in the back...");
-    console.error(err);
+    console.error(err.message);
+    res.send("Something went wrong...");
   }
 });
 
